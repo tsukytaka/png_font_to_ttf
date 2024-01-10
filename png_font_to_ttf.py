@@ -14,7 +14,7 @@ height = int(sys.argv[4])
 
 factor = 10 # size factor so that coords are in range [16, 65536]
 private_range = 0xe000 # starting codepoint of private copy
-background = (0, 0, 0) # background RGB color
+background = (0, 0, 0, 255) # background RGB color
 
 font = fontforge.font() 
 font.ascent = height * factor
@@ -23,26 +23,50 @@ font.encoding = 'UnicodeFull' # required encoding to access private range
 
 pixels = image.load()
 
+# for j in range(image.height // height):
+#     for i in range(image.width // width):
+#         offset = i + j * (image.width // width)
+
+#         # generate two copies of char, in 0-256 and in private range
+#         for codepoint in [offset, private_range + offset]:
+#             char = font.createChar(codepoint)
+#             char.width = width * factor
+#             pen = char.glyphPen()
+#             print("char: ", char)
+#             # draw each non-background pixel as a square
+#             for y in range(height):
+#                 for x in range(width):
+#                     pixel = pixels[i * width + x, j * height + y]
+#                     if pixel != background:
+#                         pen.moveTo((x * factor, (height - y) * factor)) # draw a pixel
+#                         pen.lineTo(((x + 1) * factor, (height - y) * factor))
+#                         pen.lineTo(((x + 1) * factor, (height - y - 1) * factor))
+#                         pen.lineTo((x * factor, (height - y - 1) * factor))
+#                         pen.closePath()
+
+chars = [48,49,50,51,53,56]
 for j in range(image.height // height):
     for i in range(image.width // width):
-      offset = i + j * (image.width // width)
-
-      # generate two copies of char, in 0-256 and in private range
-      for codepoint in [offset, private_range + offset]:
-          char = font.createChar(codepoint)
-          char.width = width * factor
-          pen = char.glyphPen()
-
-          # draw each non-background pixel as a square
-          for y in range(height):
-              for x in range(width):
-                  pixel = pixels[i * width + x, j * height + y]
-                  if pixel != background:
-                      pen.moveTo((x * factor, (height - y) * factor)) # draw a pixel
-                      pen.lineTo(((x + 1) * factor, (height - y) * factor))
-                      pen.lineTo(((x + 1) * factor, (height - y - 1) * factor))
-                      pen.lineTo((x * factor, (height - y - 1) * factor))
-                      pen.closePath()
+        index = i + j * (image.width // width)
+        if index > 5: break
+        offset = chars[index]
+        # generate two copies of char, in 0-256 and in private range
+        for codepoint in [offset, private_range + offset]:
+            char = font.createChar(codepoint)
+            char.width = width * factor
+            pen = char.glyphPen()
+            
+            # draw each non-background pixel as a square
+            for y in range(height):
+                for x in range(width):
+                    pixel = pixels[i * width + x, j * height + y]
+                    print("pixel %d,%d value : ", y, x, pixel) 
+                    if pixel != background:
+                        pen.moveTo((x * factor, (height - y) * factor)) # draw a pixel
+                        pen.lineTo(((x + 1) * factor, (height - y) * factor))
+                        pen.lineTo(((x + 1) * factor, (height - y - 1) * factor))
+                        pen.lineTo((x * factor, (height - y - 1) * factor))
+                        pen.closePath()
 
 # export to font 
 font.generate(output, flags=('opentype'))
