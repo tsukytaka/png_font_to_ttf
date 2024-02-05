@@ -1,2 +1,3 @@
 Pillow
 fontforge
+#python3 ./png_font_to_ttf.py  output.ttf D_number_0.png 128 127 1.fnt
